@@ -388,6 +388,11 @@ $RECYCLE.BIN/
 *.msp
 
 # Windows shortcuts
+
+# Output files
+*.png
+*.pdf
+*.csv
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm+all,jupyternotebooks,python,macos,vim,emacs,linux,windows
