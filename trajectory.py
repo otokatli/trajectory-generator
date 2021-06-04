@@ -3,9 +3,10 @@ from numpy.linalg import inv
 from scipy.linalg import expm, logm
 
 
-def geodesic(T_start, T_end, t_start, t_end, h):
+def straight_line(T_start, T_end, t_start, t_end, h):
     """
-    Create a geodesic trajectory (in SE(3)) between given start and end poses
+    Create a straight line  trajectory in SE(3) between given start and end
+    poses
 
     :param T_start: Initial pose on the trajectory
     :param T_end: Final pose on the trajectory
@@ -23,10 +24,10 @@ def geodesic(T_start, T_end, t_start, t_end, h):
     b = array([0.0, 0.0, 1.0, 0.0])
 
     # coefficients of the cubic time scaling polynomial
-    # s(t) = a[0] * t**3 + a[1] * t**2 + a[2] * t + a[3] * t
+    # s(t) = a[0] * t**3 + a[1] * t**2 + a[2] * t + a[3]
     a = (inv(A) @ b)[::-1]
     
-    # Time derivative of the time scaling polynimial
+    # Time derivative of the time scaling polynomial
     ap = polyder(a)
 
     # Time vector for the trajectory
