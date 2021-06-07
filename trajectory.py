@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import arange, array, polyder, polyval
 from numpy.linalg import inv
 from scipy.linalg import expm, logm
@@ -41,3 +42,22 @@ def straight_line(T_start, T_end, t_start, t_end, h):
             [T_start @ logm(inv(T_start) @ T_end) @ expm(logm(inv(T_start) 
                                                               @ T_end) * s)
              * sp for (s, sp) in zip(s_values, sp_values)])
+
+
+def circular_trajectory(T_start, r, f, t, plane='xy'):
+    x_start, y_start, z_start = T_start[0:3, 3]
+
+    if plane == 'xy' or plane == 'yx':
+        x = x_start - r * (1 - np.cos(2 * np.pi * f * t))
+        y = y_start - r * np.sin(2 * np.pi * f * t)
+        z = np.ones(t.shape) * z_start
+    elif plane == 'yz' or plane == 'zy':
+        x = np.ones(t.shape) * x_start
+        y = y_start - r * np.sin(2 * np.pi * f * t)
+        z = z_start - r * (1 - np.cos(2 * np.pi * f * t))
+    elif plane == 'xz' or plane == 'zx':
+        x = x_start - r * (1 - np.cos(2 * np.pi * f * t))
+        y = np.ones(t.shape) * y_start
+        z = z_start - r * np.sin(2 * np.pi * f * t)
+
+    return np.vstack((x, y, z)).transpose()
