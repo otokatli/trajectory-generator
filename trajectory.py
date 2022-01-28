@@ -4,7 +4,7 @@ from numpy.linalg import inv
 from scipy.linalg import expm, logm
 
 
-def straight_line(T_start, T_end, t_start, t_end, h):
+def straight_trajectory(T_start, T_end, t_start, t_end, h):
     """
     Create a straight line  trajectory in SE(3) between given start and end
     poses
@@ -44,8 +44,11 @@ def straight_line(T_start, T_end, t_start, t_end, h):
              * sp for (s, sp) in zip(s_values, sp_values)])
 
 
-def circular_trajectory(T_start, r, f, t, plane='xy'):
+def circular_trajectory(T_start, r, f, t_start, t_end, h, plane='xy'):
     x_start, y_start, z_start = T_start[0:3, 3]
+
+    # Time vector for the trajectory
+    t = arange(t_start, t_end + h, h)
 
     if plane == 'xy' or plane == 'yx':
         x = x_start - r * (1 - np.cos(2 * np.pi * f * t))
@@ -61,3 +64,62 @@ def circular_trajectory(T_start, r, f, t, plane='xy'):
         z = z_start - r * np.sin(2 * np.pi * f * t)
 
     return np.vstack((x, y, z)).transpose()
+
+
+def eight_trajectory(T_start, r, f, t_start, t_end, h, plane='xy'):
+    x_start, y_start, z_start = T_start[0:3, 3]
+
+    # Time vector for the trajectory
+    t = arange(t_start, t_end + h, h)
+
+    if plane == 'xy' or plane == 'yx':
+        x = x_start - r * np.sin(2 * np.pi * f * t)
+        y = y_start - r * np.sin(2 * np.pi * f * t) * np.cos(2 * np.pi * f * t)
+        z = np.ones(t.shape) * z_start
+    # elif plane == 'yz' or plane == 'zy':
+    #     x = np.ones(t.shape) * x_start
+    #     y = y_start - r * np.sin(2 * np.pi * f * t)
+    #     z = z_start - r * (1 - np.cos(2 * np.pi * f * t))
+    # elif plane == 'xz' or plane == 'zx':
+    #     x = x_start - r * (1 - np.cos(2 * np.pi * f * t))
+    #     y = np.ones(t.shape) * y_start
+    #     z = z_start - r * np.sin(2 * np.pi * f * t)
+
+    return np.vstack((x, y, z)).transpose()
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
+    # Initial pose on the trajectory
+    T0 = np.array([[1.0, 0.0, 0.0, 0.0],
+                   [0.0, 1.0, 0.0, 0.0],
+                   [0.0, 0.0, 1.0, 0.0],
+                   [0.0, 0.0, 0.0, 1.0]])
+
+    # Final pose on the trajectory
+    T1 = np.array([[0.7071069, -0.7071066, 0.0, 1.0],
+                   [0.7071066, 0.7071069, 0.0, 2.0],
+                   [0.0, 0.0, 1.0, 3.0],
+                   [0.0, 0.0, 0.0, 1.0]])
+
+    # Initial and the final time on the trajectory
+    t0, t1 = 0.0, 8.0
+
+    # Time step for the trajectory
+    step = 1e-3
+
+    # Time vector
+    t_vec = arange(t0, t1 + step, step)
+
+    # Straight trajectory
+    tr, trp = straight_trajectory(T0, T1, t0, t1, step)
+
+    # Plot the trajectory
+    fig, ax = plt.subplots()
+    ax.plot(t_vec, tr)
+    # Circular trajectory
+    tr = circular_trajectory(T0, 0.25, 1.0, t0, t1, step, plane='xy')
+
+    # Eight trajectory
+    tr = eight_trajectory(T0, 0.25, 1.0, t0, t1, step, plane='xy')
